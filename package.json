@@ -11,7 +11,7 @@
     "dev": "vite",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/nest-project-assets.mjs",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy"
   },

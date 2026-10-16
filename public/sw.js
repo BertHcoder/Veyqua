@@ -1,10 +1,17 @@
 // Veyqua service worker: makes the app shell work offline.
 // User data lives in localStorage and is never touched here.
 const CACHE = 'veyqua-v1';
-const SHELL = '/';
-const EXTRAS = ['/manifest.webmanifest', '/favicon.ico', '/icons/icon-96.png', '/icons/icon-192.png'];
+const BASE_PATH = new URL(self.registration.scope).pathname;
+const SHELL = BASE_PATH;
+const EXTRAS = [
+  `${BASE_PATH}manifest.webmanifest`,
+  `${BASE_PATH}favicon.ico`,
+  `${BASE_PATH}icons/icon-96.png`,
+  `${BASE_PATH}icons/icon-192.png`,
+];
 
-const assetPaths = (html) => [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((match) => match[1]);
+const assetPaths = (html) =>
+  [...html.matchAll(/(?:src|href)="([^"]+\/assets\/[^"]+)"/g)].map((match) => new URL(match[1], self.location.origin).pathname);
 
 /** Stores a fresh index.html and keeps exactly the hashed assets it references. */
 async function storeShell(response) {
@@ -17,7 +24,7 @@ async function storeShell(response) {
   await Promise.all(
     cached.map((request) => {
       const path = new URL(request.url).pathname;
-      if (!path.startsWith('/assets/')) return undefined;
+      if (!path.startsWith(`${BASE_PATH}assets/`)) return undefined;
       if (wanted.has(path)) return have.add(path);
       return cache.delete(request);
     }),
@@ -74,7 +81,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Hashed build output never changes: cache first.
-  if (url.pathname.startsWith('/assets/')) {
+  if (url.pathname.startsWith(`${BASE_PATH}assets/`)) {
     event.respondWith(
       (async () => {
         const cached = await caches.match(request);

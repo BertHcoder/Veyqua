@@ -23,7 +23,13 @@ function Welcome() {
   return (
     <div className="welcome">
       <section className="hero">
-        <img src="/icons/icon-192.png" alt="" width="96" height="96" className="hero-logo" />
+        <img
+          src={`${import.meta.env.BASE_URL}icons/icon-192.png`}
+          alt=""
+          width="96"
+          height="96"
+          className="hero-logo"
+        />
         <h1>{t('welcome.title')}</h1>
         <p className="lead">{t('welcome.lead')}</p>
         <div className="toolbar toolbar-center">

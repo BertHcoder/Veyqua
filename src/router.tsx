@@ -2,6 +2,11 @@ import { useSyncExternalStore, type AnchorHTMLAttributes } from 'react';
 
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((listener) => listener());
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const withBasePath = (path: string) => `${BASE_PATH}${path}`;
+const withoutBasePath = (path: string) =>
+  path === BASE_PATH ? '/' : path.startsWith(`${BASE_PATH}/`) ? path.slice(BASE_PATH.length) : path;
 
 if (typeof window !== 'undefined') window.addEventListener('popstate', notify);
 
@@ -11,14 +16,15 @@ function subscribe(listener: () => void) {
 }
 
 export function navigate(to: string, options: { replace?: boolean } = {}) {
-  if (to !== location.pathname) {
-    history[options.replace ? 'replaceState' : 'pushState'](null, '', to);
+  const target = withBasePath(to);
+  if (target !== location.pathname) {
+    history[options.replace ? 'replaceState' : 'pushState'](null, '', target);
     notify();
   }
   window.scrollTo(0, 0);
 }
 
-export const usePath = () => useSyncExternalStore(subscribe, () => location.pathname);
+export const usePath = () => useSyncExternalStore(subscribe, () => withoutBasePath(location.pathname));
 
 export type TankTab = 'overview' | 'charts' | 'log' | 'livestock';
 
@@ -60,7 +66,7 @@ type LinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & { to: s
 export function Link({ to, onClick, ...rest }: LinkProps) {
   return (
     <a
-      href={to}
+      href={withBasePath(to)}
       {...rest}
       onClick={(event) => {
         onClick?.(event);

@@ -29,7 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </a>
       <header className="topbar">
         <Link to="/" className="brand" aria-label={t('nav.home')}>
-          <img src="/icons/icon-96.png" alt="" width="32" height="32" />
+          <img src={`${import.meta.env.BASE_URL}icons/icon-96.png`} alt="" width="32" height="32" />
           <span>Veyqua</span>
         </Link>
         <nav className="nav" aria-label={t('nav.label')}>
